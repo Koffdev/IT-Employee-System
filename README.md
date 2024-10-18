@@ -5,7 +5,7 @@
 
 Основные проблемы, возникающие при написании программного кода, связаны с неправильным выбором архитектурных решений, небрежностью при именовании переменных и функций, сложностью отдельных методов и структур, а также с неоптимальными алгоритмами. Эти ошибки характерны как для начинающих разработчиков, так и для профессионалов, работающих с большими проектами.
 
-Цель данного реферата — рассмотреть основные проблемы и ошибки, которые часто встречаются при написании программного кода, проиллюстрировать их на конкретных примерах, а также предложить методы и инструменты для их устранения. Рассмотрение будет проводиться на примерах с языками программирования Python и C++, но большинство проблем являются универсальными и применимы к другим языкам программирования и фреймворкам.
+Цель данной работы — рассмотреть основные проблемы и ошибки, которые часто встречаются при написании программного кода, проиллюстрировать их на конкретных примерах, а также предложить методы и инструменты для их устранения. Рассмотрение будет проводиться на примерах с языком программирования Python, но большинство проблем являются универсальными и применимы к другим языкам программирования и фреймворкам.
 
 Основные проблемы и ошибки при написании программного кода
 1. Длинные методы и функции
@@ -13,192 +13,165 @@
 
 Пример ошибки:
 
-def process_order(order):
-    # Проверка валидности заказа
-    if not order.is_valid():
-        return "Invalid order"
-    
-    # Расчет стоимости заказа
-    total_price = 0
-    for item in order.items:
-        total_price += item.price
-    
-    # Определение скидки
-    if total_price > 100:
-        discount = total_price * 0.1
-    else:
-        discount = 0
-    
-    total_price -= discount
-    
-    # Сохранение в базу данных
-    db.save(order)
-    
-    # Возвращение результата
-    return f"Order processed, total price: {total_price}"
+    def process_order(order):
+        # Проверка валидности заказа
+        if not order.is_valid():
+            return "Invalid order"
+        
+        # Расчет стоимости заказа
+        total_price = 0
+        for item in order.items:
+            total_price += item.price
+        
+        # Определение скидки
+        if total_price > 100:
+            discount = total_price * 0.1
+        else:
+            discount = 0
+        
+        total_price -= discount
+        
+        # Сохранение в базу данных
+        db.save(order)
+        
+        # Возвращение результата
+        return f"Order processed, total price: {total_price}"
+        
 Решение:
 Метод следует разделить на несколько более мелких, каждая из которых выполняет отдельную задачу.
 
-python
-Копировать код
-def validate_order(order):
-    return order.is_valid()
-
-def calculate_total_price(order):
-    total_price = sum(item.price for item in order.items)
-    return total_price
-
-def apply_discount(total_price):
-    return total_price * 0.1 if total_price > 100 else 0
-
-def save_order(order):
-    db.save(order)
-
-def process_order(order):
-    if not validate_order(order):
-        return "Invalid order"
+    def validate_order(order):
+        return order.is_valid()
+        
+    def calculate_total_price(order):
+        total_price = sum(item.price for item in order.items)
+        return total_price
     
-    total_price = calculate_total_price(order)
-    discount = apply_discount(total_price)
-    total_price -= discount
+    def apply_discount(total_price):
+        return total_price * 0.1 if total_price > 100 else 0
     
-    save_order(order)
-    return f"Order processed, total price: {total_price}"
+    def save_order(order):
+        db.save(order)
+    
+    def process_order(order):
+        if not validate_order(order):
+            return "Invalid order"
+        
+        total_price = calculate_total_price(order)
+        discount = apply_discount(total_price)
+        total_price -= discount
+        
+        save_order(order)
+        return f"Order processed, total price: {total_price}"
+
+        
 2. Дублирование кода
 Дублирование кода увеличивает сложность его поддержки. Если нужно изменить логику в одном месте, может понадобиться внести изменения и в другие участки программы, где дублируется этот код, что увеличивает вероятность появления ошибок.
 
 Пример ошибки:
 
-python
-Копировать код
-def create_user(username, password):
-    hashed_password = hash_password(password)
-    db.insert_user(username, hashed_password)
-
-def update_user_password(user_id, new_password):
-    hashed_password = hash_password(new_password)
-    db.update_user_password(user_id, hashed_password)
+    def create_user(username, password):
+        hashed_password = hash_password(password)
+        db.insert_user(username, hashed_password)
+    
+    def update_user_password(user_id, new_password):
+        hashed_password = hash_password(new_password)
+        db.update_user_password(user_id, hashed_password)
+        
 Здесь дублируется операция хеширования пароля.
 
 Решение:
 Хеширование пароля можно вынести в отдельную функцию.
 
-python
-Копировать код
-def hash_password(password):
-    return some_hashing_library.hash(password)
+    def hash_password(password):
+        return some_hashing_library.hash(password)
+    
+    def create_user(username, password):
+        hashed_password = hash_password(password)
+        db.insert_user(username, hashed_password)
+    
+    def update_user_password(user_id, new_password):
+        hashed_password = hash_password(new_password)
+        db.update_user_password(user_id, hashed_password)
 
-def create_user(username, password):
-    hashed_password = hash_password(password)
-    db.insert_user(username, hashed_password)
-
-def update_user_password(user_id, new_password):
-    hashed_password = hash_password(new_password)
-    db.update_user_password(user_id, hashed_password)
+    
 3. Плохие имена функций и переменных
 Неинформативные или слишком короткие имена переменных и функций затрудняют чтение кода и его понимание. При выборе имен важно использовать слова, точно описывающие цель и поведение переменной или функции.
 
 Пример ошибки:
 
-python
-Копировать код
-def calc(a, b):
-    return a + b
+    def calc(a, b):
+        return a + b
+        
 Решение:
 Использовать более выразительные и понятные имена:
 
-python
-Копировать код
-def calculate_sum(first_number, second_number):
-    return first_number + second_number
+    def calculate_sum(first_number, second_number):
+        return first_number + second_number
+
+        
 4. Избыточные временные переменные
 Часто неопытные разработчики создают множество временных переменных, которые не несут дополнительной информации, но засоряют код и делают его менее читабельным.
 
 Пример ошибки:
 
-python
-Копировать код
-def square_number(n):
-    temp = n * n
-    result = temp
-    return result
+    def square_number(n):
+        temp = n * n
+        result = temp
+        return result
+        
 Решение:
 Можно сократить количество переменных:
 
-python
-Копировать код
-def square_number(n):
-    return n * n
-5. Утечки памяти
-В языках, где управление памятью осуществляется вручную (например, C++), утечки памяти могут стать серьезной проблемой. Они происходят, когда память выделяется, но не освобождается, что приводит к её накоплению и снижению производительности системы.
+    def square_number(n):
+        return n * n
+    
 
-Пример на C++:
-
-cpp
-Копировать код
-void someFunction() {
-    int* arr = new int[100];
-    // Использование arr
-    // Утечка памяти, так как delete[] не был вызван
-}
-Решение:
-Использование умных указателей, которые автоматически освобождают память.
-
-cpp
-Копировать код
-#include <memory>
-
-void someFunction() {
-    std::unique_ptr<int[]> arr = std::make_unique<int[]>(100);
-    // Умный указатель автоматически освободит память
-}
-6. Необработанные исключения
+5. Необработанные исключения
 Необработанные исключения могут привести к неожиданным сбоям программы. Например, если программа пытается открыть файл, которого не существует, это может привести к аварийному завершению работы без возможности восстановления.
 
 Пример ошибки:
 
-python
-Копировать код
-def read_file(filename):
-    with open(filename, 'r') as file:
-        return file.read()
+    def read_file(filename):
+        with open(filename, 'r') as file:
+            return file.read()
+            
 Если файл не существует, программа завершится с ошибкой.
 
 Решение:
 Добавление обработки исключений:
 
-python
-Копировать код
-def read_file(filename):
-    try:
-        with open(filename, 'r') as file:
-            return file.read()
-    except FileNotFoundError:
-        print(f"File {filename} not found")
-        return None
-7. Длительное выполнение операций
+    def read_file(filename):
+        try:
+            with open(filename, 'r') as file:
+                return file.read()
+        except FileNotFoundError:
+            print(f"File {filename} not found")
+            return None
+
+            
+6. Длительное выполнение операций
 Использование неоптимальных алгоритмов и структур данных может значительно замедлить выполнение программы, особенно при работе с большими объемами данных.
 
 Пример ошибки:
 
-python
-Копировать код
-def find_duplicates(items):
-    duplicates = []
-    for i in range(len(items)):
-        for j in range(i + 1, len(items)):
-            if items[i] == items[j]:
-                duplicates.append(items[i])
-    return duplicates
+    def find_duplicates(items):
+        duplicates = []
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                if items[i] == items[j]:
+                    duplicates.append(items[i])
+        return duplicates
+    
 Этот алгоритм использует вложенные циклы, что замедляет его выполнение на больших данных.
 
 Решение:
 Использование более эффективных структур данных, таких как множества.
 
-python
-Копировать код
-def find_duplicates(items):
-    return list(set([item for item in items if items.count(item) > 1]))
+    def find_duplicates(items):
+        return list(set([item for item in items if items.count(item) > 1]))
+
+        
 Методы устранения ошибок
 Рефакторинг:
 Регулярное улучшение кода помогает устранить дублирование, сделать методы и функции короче и проще.
